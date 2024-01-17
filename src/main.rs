@@ -1,8 +1,8 @@
 use std::time::Duration;
 
 use bevy::prelude::{
-    default, App, AssetServer, AudioBundle, AudioSource, Commands, Handle, Local, Res, ResMut,
-    Resource, Startup, Time, Timer, TimerMode, Update,
+    default, App, AssetServer, AudioBundle, AudioSource, Commands, Handle, Input, KeyCode, Local,
+    Res, ResMut, Resource, Startup, Time, Timer, TimerMode, Update,
 };
 use bevy::DefaultPlugins;
 use bevy_egui::{egui, EguiContexts, EguiPlugin};
@@ -54,6 +54,7 @@ fn main() {
         .add_systems(Update, click_system)
         .add_systems(Update, ui_example_system)
         .add_systems(Update, update_system)
+        .add_systems(Update, keyboard_system)
         .run();
 }
 
@@ -105,12 +106,70 @@ fn update_system(
     *change_detector = settings.clone();
 }
 
+fn keyboard_system(keyboard_input: Res<Input<KeyCode>>, mut settings: ResMut<Settings>) {
+    if keyboard_input.just_pressed(KeyCode::Space) || keyboard_input.just_pressed(KeyCode::Return) {
+        settings.play = !settings.play;
+    }
+
+    if keyboard_input.just_pressed(KeyCode::Up) {
+        settings.bpm += 1;
+    }
+
+    if keyboard_input.just_pressed(KeyCode::Down) {
+        settings.bpm -= 1;
+    }
+
+    if keyboard_input.just_pressed(KeyCode::Left) {
+        settings.bpm -= 10;
+    }
+
+    if keyboard_input.just_pressed(KeyCode::Right) {
+        settings.bpm += 10;
+    }
+}
+
 fn ui_example_system(mut contexts: EguiContexts, mut settings: ResMut<Settings>) {
     egui::Area::new("metronome").show(contexts.ctx_mut(), |ui| {
         ui.label("Metronome");
         ui.separator();
         ui.label("BPM");
-        ui.add(egui::Slider::new(&mut settings.bpm, 60..=300).text("BPM"));
+        ui.horizontal_wrapped(|ui| {
+            ui.centered_and_justified(|ui| {
+                ui.add(egui::Slider::new(&mut settings.bpm, 60..=300).text("BPM"));
+            });
+            ui.vertical(|ui| {
+                if ui
+                    .button("+")
+                    .on_hover_text("Increase BPM by 1 (Arrow Up)")
+                    .clicked()
+                {
+                    settings.bpm += 1;
+                }
+                if ui
+                    .button("-")
+                    .on_hover_text("Decrease BPM by 1 (Arrow Down)")
+                    .clicked()
+                {
+                    settings.bpm -= 1;
+                }
+            });
+            ui.vertical(|ui| {
+                if ui
+                    .button("+10")
+                    .on_hover_text("Increase BPM by 10 (Arrow Right)")
+                    .clicked()
+                {
+                    settings.bpm += 10;
+                }
+                if ui
+                    .button("-10")
+                    .on_hover_text("Decrease BPM by 10 (Arrow Left)")
+                    .clicked()
+                {
+                    settings.bpm -= 10;
+                }
+            });
+        });
         ui.separator();
         ui.checkbox(&mut settings.play, "Play");
     });
