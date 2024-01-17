@@ -1,0 +1,8 @@
+[package]
+name = "metronome"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bevy = {version =  "0.12.1", features = ["mp3"] }
+bevy_egui = "0.24.0"
