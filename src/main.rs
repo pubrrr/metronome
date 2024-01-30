@@ -5,7 +5,11 @@ use bevy::prelude::{
     Res, ResMut, Resource, Startup, Time, Timer, TimerMode, Update,
 };
 use bevy::DefaultPlugins;
-use bevy_egui::{egui, EguiContexts, EguiPlugin};
+use bevy_egui::EguiPlugin;
+
+use crate::ui::ui_system;
+
+mod ui;
 
 #[derive(Resource)]
 struct Sounds {
@@ -19,18 +23,27 @@ struct ClickTimer(Timer);
 struct Settings {
     bpm: u16,
     play: bool,
+    max_beats: u8,
 }
-
-const DEFAULT_BPM: u16 = 120;
 
 impl Default for Settings {
     fn default() -> Self {
         Self {
             bpm: DEFAULT_BPM,
             play: false,
+            max_beats: 4,
         }
     }
 }
+
+#[derive(Resource, Eq, PartialEq, Clone, Default)]
+struct State {
+    beat: u8,
+}
+
+const DEFAULT_BPM: u16 = 120;
+const MIN_BPM: u16 = 60;
+const MAX_BPM: u16 = 300;
 
 impl Default for ClickTimer {
     fn default() -> Self {
@@ -50,10 +63,12 @@ fn main() {
         .add_plugins(EguiPlugin)
         .init_resource::<ClickTimer>()
         .init_resource::<Settings>()
+        .init_resource::<State>()
         .add_systems(Startup, setup)
         .add_systems(Update, click_system)
-        .add_systems(Update, ui_example_system)
+        .add_systems(Update, ui_system)
         .add_systems(Update, update_system)
+        .add_systems(Update, bpm_limit_system)
         .add_systems(Update, keyboard_system)
         .run();
 }
@@ -69,9 +84,13 @@ fn click_system(
     mut click_timer: ResMut<ClickTimer>,
     sounds: Res<Sounds>,
     mut commands: Commands,
+    settings: Res<Settings>,
+    mut state: ResMut<State>,
 ) {
     click_timer.0.tick(time.delta());
     if click_timer.0.just_finished() {
+        state.beat = (state.beat + 1) % settings.max_beats;
+        // TODO other click if beat == 1
         commands.spawn(AudioBundle {
             source: sounds.click.clone(),
             ..default()
@@ -88,19 +107,21 @@ fn update_system(
         return;
     }
 
-    if settings.play != change_detector.play {
-        if settings.play {
-            click_timer.0.unpause();
-            click_timer.0.reset();
-        } else {
-            click_timer.0.pause();
-        }
-    }
-
     if settings.bpm != change_detector.bpm {
         click_timer
             .0
             .set_duration(Duration::from_secs_f32(seconds_from_bpm(settings.bpm)));
+    }
+
+    if settings.play != change_detector.play {
+        if settings.play {
+            click_timer.0.unpause();
+            click_timer.0.reset();
+            let duration = click_timer.0.duration().clone() - Duration::from_micros(1);
+            click_timer.0.tick(duration);
+        } else {
+            click_timer.0.pause();
+        }
     }
 
     *change_detector = settings.clone();
@@ -128,49 +149,12 @@ fn keyboard_system(keyboard_input: Res<Input<KeyCode>>, mut settings: ResMut<Set
     }
 }
 
-fn ui_example_system(mut contexts: EguiContexts, mut settings: ResMut<Settings>) {
-    egui::Area::new("metronome").show(contexts.ctx_mut(), |ui| {
-        ui.label("Metronome");
-        ui.separator();
-        ui.label("BPM");
-        ui.horizontal_wrapped(|ui| {
-            ui.centered_and_justified(|ui| {
-                ui.add(egui::Slider::new(&mut settings.bpm, 60..=300).text("BPM"));
-            });
-            ui.vertical(|ui| {
-                if ui
-                    .button("+")
-                    .on_hover_text("Increase BPM by 1 (Arrow Up)")
-                    .clicked()
-                {
-                    settings.bpm += 1;
-                }
-                if ui
-                    .button("-")
-                    .on_hover_text("Decrease BPM by 1 (Arrow Down)")
-                    .clicked()
-                {
-                    settings.bpm -= 1;
-                }
-            });
-            ui.vertical(|ui| {
-                if ui
-                    .button("+10")
-                    .on_hover_text("Increase BPM by 10 (Arrow Right)")
-                    .clicked()
-                {
-                    settings.bpm += 10;
-                }
-                if ui
-                    .button("-10")
-                    .on_hover_text("Decrease BPM by 10 (Arrow Left)")
-                    .clicked()
-                {
-                    settings.bpm -= 10;
-                }
-            });
-        });
-        ui.separator();
-        ui.checkbox(&mut settings.play, "Play");
-    });
+fn bpm_limit_system(mut settings: ResMut<Settings>) {
+    if settings.bpm < MIN_BPM {
+        settings.bpm = MIN_BPM;
+    }
+
+    if settings.bpm > MAX_BPM {
+        settings.bpm = MAX_BPM;
+    }
 }
