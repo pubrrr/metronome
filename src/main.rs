@@ -1,9 +1,6 @@
 use std::time::Duration;
 
-use bevy::prelude::{
-    default, App, AssetServer, AudioBundle, AudioSource, Commands, Handle, Input, KeyCode, Local,
-    Res, ResMut, Resource, Startup, Time, Timer, TimerMode, Update,
-};
+use bevy::prelude::{default, App, AssetServer, AudioBundle, AudioSource, Commands, Handle, KeyCode, Local, Res, ResMut, Resource, Startup, Time, Timer, TimerMode, Update, ButtonInput};
 use bevy::DefaultPlugins;
 use bevy_egui::EguiPlugin;
 
@@ -127,24 +124,24 @@ fn update_system(
     *change_detector = settings.clone();
 }
 
-fn keyboard_system(keyboard_input: Res<Input<KeyCode>>, mut settings: ResMut<Settings>) {
-    if keyboard_input.just_pressed(KeyCode::Space) || keyboard_input.just_pressed(KeyCode::Return) {
+fn keyboard_system(keyboard_input: Res<ButtonInput<KeyCode>>, mut settings: ResMut<Settings>) {
+    if keyboard_input.just_pressed(KeyCode::Space) || keyboard_input.just_pressed(KeyCode::Enter) {
         settings.play = !settings.play;
     }
 
-    if keyboard_input.just_pressed(KeyCode::Up) {
+    if keyboard_input.just_pressed(KeyCode::ArrowUp) {
         settings.bpm += 1;
     }
 
-    if keyboard_input.just_pressed(KeyCode::Down) {
+    if keyboard_input.just_pressed(KeyCode::ArrowDown) {
         settings.bpm -= 1;
     }
 
-    if keyboard_input.just_pressed(KeyCode::Left) {
+    if keyboard_input.just_pressed(KeyCode::ArrowLeft) {
         settings.bpm -= 10;
     }
 
-    if keyboard_input.just_pressed(KeyCode::Right) {
+    if keyboard_input.just_pressed(KeyCode::ArrowRight) {
         settings.bpm += 10;
     }
 }
