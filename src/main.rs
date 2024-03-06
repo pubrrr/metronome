@@ -1,6 +1,9 @@
 use std::time::Duration;
 
-use bevy::prelude::{default, App, AssetServer, AudioBundle, AudioSource, Commands, Handle, KeyCode, Local, Res, ResMut, Resource, Startup, Time, Timer, TimerMode, Update, ButtonInput};
+use bevy::prelude::{
+    default, App, AssetServer, AudioBundle, AudioSource, ButtonInput, Commands, Handle, KeyCode,
+    Local, Res, ResMut, Resource, Startup, Time, Timer, TimerMode, Update,
+};
 use bevy::DefaultPlugins;
 use bevy_egui::EguiPlugin;
 

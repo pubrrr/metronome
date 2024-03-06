@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <style>
+        canvas {
+            background-color: white;
+            display: block;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+    <title>Bevy Metronome</title>
+</head>
+<body>
+<p id="message"></p>
+<button id="loadButton">Load</button>
+<script type="module">
+    import init from './wasm/metronome_wasm.js'
+
+    await (async function () {
+        let started = false;
+
+        async function startWithAudioContext() {
+            console.log("starting");
+            const audioContext = new AudioContext();
+            const message = document.querySelector('#message');
+            await audioContext.resume()
+                .then(() => {
+                    message.innerText = "Loading...";
+                    document.querySelector('#loadButton').remove();
+                    console.log("ok");
+                    started = true;
+                    init();
+                    message.remove();
+                });
+        }
+
+
+        document.querySelector('#loadButton').addEventListener('click', startWithAudioContext);
+
+        await startWithAudioContext();
+    })();
+</script>
+</body>
+</html>

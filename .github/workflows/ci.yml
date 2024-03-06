@@ -11,14 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            target/
-          key: cargo-build-${{ hashFiles('Cargo.toml') }}
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
       - name: Install system dependencies
         run: sudo apt-get install libasound2-dev libudev-dev
       - name: Run tests
@@ -28,25 +21,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/cache@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            server/target/
-          key: cargo-build-${{ hashFiles('Cargo.toml') }}
+          components: clippy, rustfmt
       - name: Install system dependencies
         run: sudo apt-get install libasound2-dev libudev-dev
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          components: rustfmt, clippy
-          override: true
       - name: rustfmt
         run: cargo fmt --all -- --check
-      - uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: --all-targets --all-features -- -A deprecated -D warnings
+      - name: clippy
+        run: cargo clippy --all-targets --all-features -- -A deprecated -D warnings
