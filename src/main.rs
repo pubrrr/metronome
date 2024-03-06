@@ -117,7 +117,7 @@ fn update_system(
         if settings.play {
             click_timer.0.unpause();
             click_timer.0.reset();
-            let duration = click_timer.0.duration().clone() - Duration::from_micros(1);
+            let duration = click_timer.0.duration() - Duration::from_micros(1);
             click_timer.0.tick(duration);
         } else {
             click_timer.0.pause();
