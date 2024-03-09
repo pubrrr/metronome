@@ -66,11 +66,16 @@ fn main() {
         .init_resource::<Settings>()
         .init_resource::<State>()
         .add_systems(Startup, setup)
-        .add_systems(Update, click_system)
-        .add_systems(Update, ui_system)
-        .add_systems(Update, update_system)
-        .add_systems(Update, bpm_limit_system)
-        .add_systems(Update, keyboard_system)
+        .add_systems(
+            Update,
+            (
+                click_system,
+                ui_system,
+                update_system,
+                bpm_limit_system,
+                keyboard_system,
+            ),
+        )
         .run();
 }
 
@@ -91,7 +96,10 @@ fn click_system(
 ) {
     click_timer.0.tick(time.delta());
     if click_timer.0.just_finished() {
-        state.beat = state.beat % settings.max_beats + 1;
+        state.beat = match settings.max_beats {
+            0 => 0,
+            _ => state.beat % settings.max_beats + 1,
+        };
 
         let click_sound = match state.beat {
             1 => sounds.strong_click.clone(),
@@ -153,6 +161,14 @@ fn keyboard_system(keyboard_input: Res<ButtonInput<KeyCode>>, mut settings: ResM
 
     if keyboard_input.just_pressed(KeyCode::ArrowRight) {
         settings.bpm += 10;
+    }
+
+    if keyboard_input.just_pressed(KeyCode::PageDown) {
+        settings.max_beats -= 1;
+    }
+
+    if keyboard_input.just_pressed(KeyCode::PageUp) {
+        settings.max_beats += 1;
     }
 }
 
