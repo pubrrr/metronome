@@ -1,9 +1,9 @@
 use std::time::Duration;
 
 use bevy::prelude::{
-    App, AssetServer, AudioBundle, AudioSource, ButtonInput, Commands, FixedUpdate, Handle,
-    KeyCode, Local, PlaybackSettings, Res, ResMut, Resource, Startup, Time, Timer, TimerMode,
-    Update,
+    default, App, AssetServer, AudioBundle, AudioSource, ButtonInput, Commands, FixedUpdate,
+    Handle, KeyCode, Local, PlaybackSettings, PluginGroup, Res, ResMut, Resource, Startup, Time,
+    Timer, TimerMode, Update, Window, WindowPlugin,
 };
 use bevy::DefaultPlugins;
 use bevy_egui::EguiPlugin;
@@ -61,7 +61,13 @@ fn seconds_from_bpm(bpm: u16) -> f32 {
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins)
+        .add_plugins(DefaultPlugins.set(WindowPlugin {
+            primary_window: Some(Window {
+                resolution: (500., 300.).into(),
+                ..default()
+            }),
+            ..default()
+        }))
         .add_plugins(EguiPlugin)
         .init_resource::<ClickTimer>()
         .init_resource::<Settings>()
