@@ -1,8 +1,9 @@
 use std::time::Duration;
 
 use bevy::prelude::{
-    App, AssetServer, AudioBundle, AudioSource, ButtonInput, Commands, Handle, KeyCode, Local,
-    PlaybackSettings, Res, ResMut, Resource, Startup, Time, Timer, TimerMode, Update,
+    App, AssetServer, AudioBundle, AudioSource, ButtonInput, Commands, FixedUpdate, Handle,
+    KeyCode, Local, PlaybackSettings, Res, ResMut, Resource, Startup, Time, Timer, TimerMode,
+    Update,
 };
 use bevy::DefaultPlugins;
 use bevy_egui::EguiPlugin;
@@ -66,15 +67,10 @@ fn main() {
         .init_resource::<Settings>()
         .init_resource::<State>()
         .add_systems(Startup, setup)
+        .add_systems(FixedUpdate, click_system)
         .add_systems(
             Update,
-            (
-                click_system,
-                ui_system,
-                update_system,
-                bpm_limit_system,
-                keyboard_system,
-            ),
+            (ui_system, update_system, bpm_limit_system, keyboard_system),
         )
         .run();
 }

@@ -16,28 +16,22 @@
 </head>
 <body>
 <p id="message"></p>
-<button id="loadButton">Load</button>
+<button id="loadButton" autofocus>Load</button>
 <script type="module">
     import init from './wasm/metronome_wasm.js'
 
     await (async function () {
-        let started = false;
-
         async function startWithAudioContext() {
-            console.log("starting");
             const audioContext = new AudioContext();
             const message = document.querySelector('#message');
             await audioContext.resume()
                 .then(() => {
                     message.innerText = "Loading...";
                     document.querySelector('#loadButton').remove();
-                    console.log("ok");
-                    started = true;
                     init();
                     message.remove();
                 });
         }
-
 
         document.querySelector('#loadButton').addEventListener('click', startWithAudioContext);
 
