@@ -17,9 +17,10 @@ pub fn ui_system(mut contexts: EguiContexts, mut settings: ResMut<Settings>, sta
         });
         ui.separator();
 
-        ui.label(format!("Beat: {}", state.beat));
-
-        play_button(settings, ui);
+        ui.vertical_centered(|ui| {
+            ui.label(format!("Beat: {}", state.beat));
+            play_button(settings, ui);
+        });
     });
 }
 
@@ -96,17 +97,17 @@ fn control_button<F: FnMut()>(ui: &mut Ui, text: &str, mut on_click: F, tooltip:
 }
 
 fn play_button(mut settings: ResMut<Settings>, ui: &mut Ui) {
-    ui.horizontal(|ui| {
-        let play_button = Button::new(match settings.play {
-            true => "Stop",
-            false => "Play",
-        })
-        .min_size([100., 50.].into())
-        .ui(ui)
-        .on_hover_text("(Space/Enter)");
+    // ui.horizontal(|ui| {
+    let play_button = Button::new(match settings.play {
+        true => "Stop",
+        false => "Play",
+    })
+    .min_size([100., 50.].into())
+    .ui(ui)
+    .on_hover_text("(Space/Enter)");
 
-        if play_button.clicked() {
-            settings.play = !settings.play;
-        }
-    });
+    if play_button.clicked() {
+        settings.play = !settings.play;
+    }
+    // });
 }
