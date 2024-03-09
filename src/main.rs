@@ -1,8 +1,8 @@
 use std::time::Duration;
 
 use bevy::prelude::{
-    default, App, AssetServer, AudioBundle, AudioSource, ButtonInput, Commands, Handle, KeyCode,
-    Local, Res, ResMut, Resource, Startup, Time, Timer, TimerMode, Update,
+    App, AssetServer, AudioBundle, AudioSource, ButtonInput, Commands, Handle, KeyCode, Local,
+    PlaybackSettings, Res, ResMut, Resource, Startup, Time, Timer, TimerMode, Update,
 };
 use bevy::DefaultPlugins;
 use bevy_egui::EguiPlugin;
@@ -13,7 +13,8 @@ mod ui;
 
 #[derive(Resource)]
 struct Sounds {
-    click: Handle<AudioSource>,
+    weak_click: Handle<AudioSource>,
+    strong_click: Handle<AudioSource>,
 }
 
 #[derive(Resource)]
@@ -75,7 +76,8 @@ fn main() {
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.insert_resource(Sounds {
-        click: asset_server.load("click.mp3"),
+        weak_click: asset_server.load("click.wav"),
+        strong_click: asset_server.load("click1.wav"),
     });
 }
 
@@ -89,11 +91,16 @@ fn click_system(
 ) {
     click_timer.0.tick(time.delta());
     if click_timer.0.just_finished() {
-        state.beat = (state.beat + 1) % settings.max_beats;
-        // TODO other click if beat == 1
+        state.beat = state.beat % settings.max_beats + 1;
+
+        let click_sound = match state.beat {
+            1 => sounds.strong_click.clone(),
+            _ => sounds.weak_click.clone(),
+        };
+
         commands.spawn(AudioBundle {
-            source: sounds.click.clone(),
-            ..default()
+            source: click_sound,
+            settings: PlaybackSettings::DESPAWN,
         });
     }
 }
