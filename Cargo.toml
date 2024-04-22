@@ -4,5 +4,5 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-bevy = {version =  "0.13.0", features = ["wav"] }
-bevy_egui = "0.25.0"
+bevy = {version =  "0.13.2", features = ["wav"] }
+bevy_egui = "0.27.0"
