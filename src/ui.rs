@@ -6,7 +6,7 @@ use egui::widgets::Button;
 use crate::{Settings, State, MAX_BPM, MIN_BPM};
 
 pub fn ui_system(mut contexts: EguiContexts, mut settings: ResMut<Settings>, state: Res<State>) {
-    egui::Area::new("metronome").show(contexts.ctx_mut(), |ui| {
+    egui::Area::new("metronome".into()).show(contexts.ctx_mut(), |ui| {
         ui.heading("Metronome");
         ui.separator();
         ui.horizontal(|ui| {
@@ -62,7 +62,7 @@ fn bpm_controls(ui: &mut Ui, settings: &mut ResMut<Settings>) {
 fn max_beats_controls(ui: &mut Ui, settings: &mut ResMut<Settings>) {
     ui.label("Beats");
     DragValue::new(&mut settings.max_beats)
-        .clamp_range(0..=254)
+        .range(0..=254)
         .ui(ui);
 
     ui.vertical(|ui| {
