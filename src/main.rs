@@ -1,12 +1,12 @@
 use std::time::Duration;
 
 use bevy::prelude::{
-    default, App, AssetServer, AudioPlayer, AudioSource, ButtonInput, Commands, FixedUpdate,
-    Handle, KeyCode, Local, PlaybackSettings, PluginGroup, PostUpdate, Res, ResMut, Resource,
-    Startup, Time, Timer, TimerMode, Update, Window, WindowPlugin,
+    default, App, AssetServer, AudioPlayer, AudioSource, ButtonInput, Camera2d, Commands,
+    FixedUpdate, Handle, IntoScheduleConfigs, KeyCode, Local, PlaybackSettings, PluginGroup, Res,
+    ResMut, Resource, Startup, Time, Timer, TimerMode, Update, Window, WindowPlugin,
 };
 use bevy::DefaultPlugins;
-use bevy_egui::EguiPlugin;
+use bevy_egui::{EguiPlugin, EguiPrimaryContextPass, EguiStartupSet};
 
 use crate::ui::ui_system;
 
@@ -63,7 +63,7 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
-                resolution: (500., 300.).into(),
+                resolution: (500, 300).into(),
                 ..default()
             }),
             ..default()
@@ -72,11 +72,19 @@ fn main() {
         .init_resource::<ClickTimer>()
         .init_resource::<Settings>()
         .init_resource::<State>()
+        .add_systems(
+            Startup,
+            setup_camera_system.before(EguiStartupSet::InitContexts),
+        )
         .add_systems(Startup, setup)
         .add_systems(FixedUpdate, click_system)
         .add_systems(Update, (update_system, bpm_limit_system, keyboard_system))
-        .add_systems(PostUpdate, ui_system)
+        .add_systems(EguiPrimaryContextPass, ui_system)
         .run();
+}
+
+fn setup_camera_system(mut commands: Commands) {
+    commands.spawn(Camera2d);
 }
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
