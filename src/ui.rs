@@ -1,12 +1,16 @@
-use bevy::prelude::{Res, ResMut};
+use bevy::prelude::{Res, ResMut, Result};
 use bevy_egui::egui::{DragValue, Ui, Widget};
 use bevy_egui::{egui, EguiContexts};
 use egui::widgets::Button;
 
 use crate::{Settings, State, MAX_BPM, MIN_BPM};
 
-pub fn ui_system(mut contexts: EguiContexts, mut settings: ResMut<Settings>, state: Res<State>) {
-    egui::Area::new("metronome".into()).show(contexts.ctx_mut(), |ui| {
+pub fn ui_system(
+    mut contexts: EguiContexts,
+    mut settings: ResMut<Settings>,
+    state: Res<State>,
+) -> Result {
+    egui::Area::new("metronome".into()).show(contexts.ctx_mut()?, |ui| {
         ui.heading("Metronome");
         ui.separator();
         ui.horizontal(|ui| {
@@ -22,6 +26,8 @@ pub fn ui_system(mut contexts: EguiContexts, mut settings: ResMut<Settings>, sta
             play_button(settings, ui);
         });
     });
+
+    Ok(())
 }
 
 fn bpm_controls(ui: &mut Ui, settings: &mut ResMut<Settings>) {

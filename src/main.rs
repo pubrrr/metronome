@@ -68,7 +68,7 @@ fn main() {
             }),
             ..default()
         }))
-        .add_plugins(EguiPlugin)
+        .add_plugins(EguiPlugin::default())
         .init_resource::<ClickTimer>()
         .init_resource::<Settings>()
         .init_resource::<State>()
