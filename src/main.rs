@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use bevy::prelude::{
-    default, App, AssetServer, AudioBundle, AudioSource, ButtonInput, Commands, FixedUpdate,
+    default, App, AssetServer, AudioPlayer, AudioSource, ButtonInput, Commands, FixedUpdate,
     Handle, KeyCode, Local, PlaybackSettings, PluginGroup, PostUpdate, Res, ResMut, Resource,
     Startup, Time, Timer, TimerMode, Update, Window, WindowPlugin,
 };
@@ -106,10 +106,7 @@ fn click_system(
             _ => sounds.weak_click.clone(),
         };
 
-        commands.spawn(AudioBundle {
-            source: click_sound,
-            settings: PlaybackSettings::DESPAWN,
-        });
+        commands.spawn((AudioPlayer::new(click_sound), PlaybackSettings::DESPAWN));
     }
 }
 
